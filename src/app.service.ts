@@ -51,7 +51,7 @@ export class AppService {
 
     return this.httpService
       .get(url, options)
-      .pipe(map((response) => response.data));
+      .pipe(map((response) => response.data.results));
   }
 
   getMovies(): string {

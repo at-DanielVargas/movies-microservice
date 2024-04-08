@@ -1,0 +1,64 @@
+# fly.toml app configuration file generated for movies-microservice on 2024-04-08T12:37:20-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'movies-microservice'
+primary_region = 'qro'
+kill_signal = 'SIGINT'
+kill_timeout = '5s'
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  image = 'd4nilo/movies-service'
+
+[env]
+  MOVIEDB_KEY = '12680759f4b388603c305b6f7def0901'
+  MOVIEDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMjY4MDc1OWY0YjM4ODYwM2MzMDViNmY3ZGVmMDkwMSIsInN1YiI6IjY2MTFhYjk3MWYzMzE5MDE3ZGMyMzU2OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.SB9KbEHy9sfEcjQvh0Ob-0TSt4osRx-QKHzoFvjhd6M'
+  NODE_ENV = 'production'
+  PORT = '3001'
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 3001
+
+[[services.ports]]
+    port = 80
+    handlers = ['http']
+
+[[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+# [[services.http_checks]]
+#     interval = '10s'
+#     timeout = '2s'
+#     method = 'get'
+#     path = '/health'
+#     protocol = 'http'
+
+#     [services.http_checks.headers]
+#       Custom = 'Value'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[statics]]
+  guest_path = '/app/public'
+  url_prefix = '/static'

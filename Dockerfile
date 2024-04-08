@@ -1,27 +1,27 @@
-# dockerfile for build nestjs microservice for production
-
-FROM node:14.15.4-alpine3.12 as build
+FROM node:17.0.1-alpine3.14 as builder
 
 WORKDIR /app
-
-COPY package*.json ./
-
-RUN npm install
-
 COPY . .
-
+RUN npm install
 RUN npm run build
 
-# production image
 
-FROM node:14.15.4-alpine3.12
+FROM node:17.0.1-alpine3.14
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/node_modules /app/node_modules
 
-RUN npm install --only=production
 
-COPY --from=build /app/dist ./dist
+ARG PORT
+ARG MOVIEDB_KEY
+ARG MOVIEDB_TOKEN
 
-CMD ["node", "dist/main"]
+ENV PORT=$PORT
+ENV MOVIEDB_KEY=$MOVIEDB_KEY
+ENV MOVIEDB_TOKEN=$MOVIEDB_TOKEN
+EXPOSE $PORT
+
+CMD ["node", "dist/main.js"]
