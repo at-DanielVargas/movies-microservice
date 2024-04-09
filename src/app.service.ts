@@ -1,11 +1,10 @@
 import { Genre } from 'types';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Observable, map } from 'rxjs';
 
 @Injectable()
 export class AppService {
-  private readonly logger = new Logger(AppService.name);
   private readonly apiKey = process?.env?.MOVIEDB_KEY ?? '';
   private readonly apiToken = process?.env?.MOVIEDB_TOKEN ?? '';
   private readonly baseUrl = 'https://api.themoviedb.org/3';
