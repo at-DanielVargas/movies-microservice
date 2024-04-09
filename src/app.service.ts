@@ -1,14 +1,14 @@
 import { Genre } from 'types';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 
 @Injectable()
 export class AppService {
   private readonly apiKey = process?.env?.MOVIEDB_KEY ?? '';
   private readonly apiToken = process?.env?.MOVIEDB_TOKEN ?? '';
   private readonly baseUrl = 'https://api.themoviedb.org/3';
-  private readonly language = 'es-ES';
+  private readonly language = 'es-MX';
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -48,9 +48,16 @@ export class AppService {
       },
     };
 
-    return this.httpService
-      .get(url, options)
-      .pipe(map((response) => response.data));
+    return this.httpService.get(url, options).pipe(
+      map((response) => ({
+        ...response.data,
+        results: response.data.results.map((movie) => ({
+          ...movie,
+          backdrop_path: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+          poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        })),
+      })),
+    );
   }
 
   getMovies(): string {
@@ -58,33 +65,93 @@ export class AppService {
   }
 
   getMovie(id: number): Observable<any> {
-    const url = `${this.baseUrl}/movie/${id}?api_key=${this.apiKey}&language=${this.language}`;
+    const url = `${this.baseUrl}/movie/${id}?append_to_response=videos%2Cimages%2Creviews%2Crecommendations%2Csimilar%2Ccredits&api_key=${this.apiKey}&language=${this.language}`;
     const options = {
       headers: {
         Authorization: `Bearer ${this.apiToken}`,
       },
     };
 
-    return this.httpService
-      .get(url, options)
-      .pipe(map((response) => response.data));
+    return this.httpService.get(url, options).pipe(
+      map((response) => ({
+        ...response.data,
+        backdrop_path: `https://image.tmdb.org/t/p/original${response.data.backdrop_path}`,
+        poster_path: `https://image.tmdb.org/t/p/original${response.data.poster_path}`,
+        vote_average: (Number(response.data?.vote_average) / 10) * 5,
+        credits: {
+          ...response.data.credits,
+          cast: response.data.credits.cast.map((actor) => ({
+            ...actor,
+            profile_path: `https://image.tmdb.org/t/p/w500${actor.profile_path}`,
+          })),
+        },
+        related: response.data.similar.results.map((movie) => ({
+          ...movie,
+          backdrop_path: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+          poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        })),
+      })),
+    );
   }
 
-  getRelatedMovies(id: number): string {
-    return 'Hello World!' + id;
+  getRelatedMovies(id: number, page: number = 1): Observable<any> {
+    const url = `${this.baseUrl}/movie/${id}/similar?api_key=${this.apiKey}&language=${this.language}&page=${page}`;
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.apiToken}`,
+      },
+    };
+
+    return this.httpService.get(url, options).pipe(
+      map((response) => ({
+        ...response.data,
+        results: response.data.results.map((movie) => ({
+          ...movie,
+          backdrop_path: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+          poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        })),
+      })),
+    );
   }
 
   searchMovies(query: string, page: number = 1): Observable<any> {
     const url = `${this.baseUrl}/search/movie?api_key=${this.apiKey}&language=${this.language}&query=${query}&page=${page}&include_adult=false`;
-
     const options = {
       headers: {
         Authorization: `Bearer ${this.apiToken}`,
       },
     };
 
-    return this.httpService
-      .get(url, options)
-      .pipe(map((response) => response.data));
+    return this.httpService.get(url, options).pipe(
+      map((response) => ({
+        ...response.data,
+        results: response.data.results.map((movie) => ({
+          ...movie,
+          backdrop_path: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+          poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        })),
+      })),
+    );
+  }
+
+  getTrendingMovies(): Observable<any> {
+    const url = `${this.baseUrl}/trending/movie/day?language=${this.language}`;
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.apiToken}`,
+      },
+    };
+    return this.httpService.get(url, options).pipe(
+      map((response) => ({
+        ...response.data,
+        results: response.data.results.map((movie) => ({
+          ...movie,
+          backdrop_path: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+          poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        })),
+      })),
+      tap((response) => console.log(response)),
+    );
   }
 }

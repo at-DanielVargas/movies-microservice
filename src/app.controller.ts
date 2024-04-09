@@ -25,7 +25,7 @@ export class AppController {
   }
 
   @EventPattern('get_related_movies')
-  getRelatedMovies(id: number): string {
+  getRelatedMovies(id: number): Observable<any> {
     return this.appService.getRelatedMovies(id);
   }
 
@@ -48,5 +48,10 @@ export class AppController {
     page: number;
   }): Observable<any> {
     return this.appService.searchMovies(query, page);
+  }
+
+  @EventPattern('get_trending_movies')
+  getTrendingMovies(): Observable<any> {
+    return this.appService.getTrendingMovies();
   }
 }

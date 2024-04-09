@@ -16,6 +16,7 @@ kill_timeout = '5s'
 
 
 [env]
+  MICROSERVICE_HOST = '${MICROSERVICE_HOST}'
   MOVIEDB_KEY = '${MOVIEDB_KEY}'
   MOVIEDB_TOKEN = '${MOVIEDB_TOKEN}'
   NODE_ENV = 'production'
@@ -38,9 +39,6 @@ kill_timeout = '5s'
     handlers = ["tls", "http"]
     port = 443
 
-  [[services.tcp_checks]]
-    interval = "15s"
-    timeout = "2s"
 
 [[vm]]
   memory = '1gb'

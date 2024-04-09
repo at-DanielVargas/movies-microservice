@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 
 const PORT = Number(process.env.PORT) || 3001;
+const MICROSERVICE_HOST = process.env.MICROSERVICE_HOST || '::';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -11,7 +12,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        host: 'movies-microservice.internal',
+        host: MICROSERVICE_HOST,
         port: PORT,
       },
     },
