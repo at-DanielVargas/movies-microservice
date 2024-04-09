@@ -11,7 +11,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        host: '::',
+        host: 'movies-microservice.internal',
         port: PORT,
       },
     },
